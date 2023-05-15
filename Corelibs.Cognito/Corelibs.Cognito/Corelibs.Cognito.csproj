@@ -4,6 +4,9 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>Corelibs.Cognito</Title>
+    <Description>A library for AWS cognito authentication with token management and storage</Description>
   </PropertyGroup>
 
   <ItemGroup>

@@ -20,10 +20,12 @@ namespace Corelibs.Cognito
 
         public CognitoAuthentication(
             IAmazonCognitoIdentityProvider cognitoService,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ISecureStorage secureStorage)
         {
             _cognitoService = cognitoService;
             _configuration = configuration;
+            _secureStorage = secureStorage;
         }
 
         public async Task<bool> SignIn(string username, string password)
@@ -57,7 +59,7 @@ namespace Corelibs.Cognito
             }
 
             _accessToken = new JwtSecurityToken(response.AuthenticationResult.AccessToken);
-            if (_accessToken.ValidTo > DateTime.Now)
+            if (DateTime.UtcNow > _accessToken.ValidTo)
             {
                 Console.WriteLine($"Couldn't login because received token has expired");
                 return false;
@@ -65,37 +67,40 @@ namespace Corelibs.Cognito
 
             await _secureStorage.SetAsync(AccessTokenKey, response.AuthenticationResult.AccessToken);
 
-            Console.WriteLine($"Result Challenge is : {response.ChallengeName}");
-            Console.WriteLine($"Access token valid from : {_accessToken.ValidFrom} to {_accessToken.ValidTo}");
+            //Console.WriteLine($"Result Challenge is : {response.ChallengeName}");
+            //Console.WriteLine($"Access token valid from : {_accessToken.ValidFrom} to {_accessToken.ValidTo}");
 
             return true;
         }
 
         public async Task<bool> SignOut()
         {
-            var accessToken = await GetAccessToken();
-            if (accessToken is null)
-            {
-                Console.WriteLine($"Couldn't logout, because not logged in");
-                return false;
-            }
-
-            var authRequest = new GlobalSignOutRequest
-            {
-                AccessToken = accessToken.RawPayload
-            };
-
-            var response = await _cognitoService.GlobalSignOutAsync(authRequest);
-            if (!response.HttpStatusCode.IsSuccess())
-            {
-                Console.WriteLine($"Couldn't logout due to network issues");
-                return false;
-            }
-
-            if (!_secureStorage.Remove(AccessTokenKey))
-                Console.WriteLine($"Logout successful, but couldn't clear stored access token");
-
+            ClearAccessToken();
             return true;
+
+            //var accessToken = await GetAccessToken();
+            //if (accessToken is null)
+            //{
+            //    Console.WriteLine($"Couldn't logout, because not logged in");
+            //    return false;
+            //}
+
+            //var authRequest = new GlobalSignOutRequest
+            //{
+            //    AccessToken = accessToken.RawPayload
+            //};
+
+            //var response = await _cognitoService.GlobalSignOutAsync(authRequest);
+            //if (!response.HttpStatusCode.IsSuccess())
+            //{
+            //    Console.WriteLine($"Couldn't logout due to network issues");
+            //    return false;
+            //}
+
+            //if (!_secureStorage.Remove(AccessTokenKey))
+            //    Console.WriteLine($"Logout successful, but couldn't clear stored access token");
+
+            //return true;
         }
 
         public async Task<bool> IsSignedIn()
@@ -108,31 +113,37 @@ namespace Corelibs.Cognito
 
         public async Task<JwtSecurityToken> GetAccessToken()
         {
-            if (!_accessToken.IsNull() && _accessToken.ValidTo < DateTime.Now)
+            if (!_accessToken.IsNull() && DateTime.UtcNow < _accessToken.ValidTo)
                 return _accessToken;
 
             var accessTokenStr = await _secureStorage.GetAsync(AccessTokenKey);
-            if (accessTokenStr.IsNullOrEmpty() || _accessToken.ValidTo > DateTime.Now)
+            if (accessTokenStr.IsNullOrEmpty())
                 return null;
 
             _accessToken = new JwtSecurityToken(accessTokenStr);
+            if (DateTime.UtcNow > _accessToken.ValidTo)
+            {
+                _accessToken = null;
+                return null;
+            }
 
             return _accessToken;
         }
 
         public async Task<string> GetAccessTokenRaw()
         {
-            if (!_accessToken.IsNull() && _accessToken.ValidTo < DateTime.Now)
-                return _accessToken.RawPayload;
-
-            var accessTokenStr = await _secureStorage.GetAsync(AccessTokenKey);
-            if (accessTokenStr.IsNullOrEmpty() || _accessToken.ValidTo > DateTime.Now)
+            _accessToken = await GetAccessToken();
+            if (_accessToken.IsNull())
                 return string.Empty;
 
-            _accessToken = new JwtSecurityToken(accessTokenStr);
-
-            return accessTokenStr;
+            return _accessToken.RawPayload;
         }
 
+        private void ClearAccessToken()
+        {
+            _accessToken = null;
+            if (!_secureStorage.Remove(AccessTokenKey))
+                Console.WriteLine($"Logout successful, but couldn't clear stored access token");
+        }
     }
 }
