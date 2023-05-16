@@ -2,7 +2,9 @@
 using Amazon.CognitoIdentityProvider.Model;
 using Common.Basic.Collections;
 using Common.Basic.Functional;
+using Corelibs.Basic.Auth;
 using Corelibs.Basic.Net;
+using Corelibs.Basic.Storage;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 

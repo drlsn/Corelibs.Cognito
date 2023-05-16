@@ -1,7 +1,8 @@
 ﻿using Amazon;
 using Amazon.CognitoIdentityProvider;
 using Common.Basic.Collections;
-using Corelibs.Cognito;
+using Corelibs.Basic.Auth;
+using Corelibs.Basic.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -10,16 +11,6 @@ namespace Corelibs.Cognito
 {
     public static class CognitoExtensions
     {
-        public static IHttpClientBuilder AddHttpClient(
-            this IServiceCollection services, string name, IConfiguration configuration)
-        {
-            return services.AddHttpClient(name, client =>
-            {
-                var baseAddress = configuration.GetSection("ApiUrl").Value;
-                client.BaseAddress = new Uri(baseAddress);
-            });
-        }
-
         public static IServiceCollection AddCognitoAuthentication(
            this IServiceCollection services,
            ConfigurationManager configuration)

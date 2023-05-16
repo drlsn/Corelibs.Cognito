@@ -1,4 +1,5 @@
 using Amazon.CognitoIdentityProvider;
+using Corelibs.Basic.Storage;
 using Microsoft.Extensions.Configuration;
 using NSubstitute;
 
