@@ -10,15 +10,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Corelibs.Basic" Version="1.0.4" />
     <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.101.128" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.30.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Corelibs.Basic\Corelibs.Basic\Corelibs.Basic\Corelibs.Basic.csproj" />
   </ItemGroup>
 
 </Project>
