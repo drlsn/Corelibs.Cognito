@@ -13,7 +13,13 @@ namespace Corelibs.Cognito
     {
         public static IServiceCollection AddCognitoAuthentication(
            this IServiceCollection services,
-           ConfigurationManager configuration)
+           ConfigurationManager configuration) 
+            => services.AddCognitoAuthentication(configuration, assemblyName => new SecureStorage(assemblyName));
+
+        public static IServiceCollection AddCognitoAuthentication(
+           this IServiceCollection services,
+           ConfigurationManager configuration,
+           Func<string, ISecureStorage> getSecureStorage)
         {
             var assembly = Assembly.GetCallingAssembly();
             var assemblyName = assembly.GetName().Name;
@@ -30,7 +36,9 @@ namespace Corelibs.Cognito
                     }));
 
             services.AddSingleton<IAuthentication, CognitoAuthentication>();
-            services.AddSingleton<ISecureStorage>(new SecureStorage(assemblyName));
+
+            var secureStorage = getSecureStorage(assemblyName);
+            services.AddSingleton(secureStorage);
 
             return services;
         }
