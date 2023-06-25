@@ -1,7 +1,7 @@
 ﻿using Amazon;
 using Amazon.CognitoIdentityProvider;
-using Common.Basic.Collections;
 using Corelibs.Basic.Auth;
+using Corelibs.Basic.Collections;
 using Corelibs.Basic.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +14,7 @@ namespace Corelibs.Cognito
         public static IServiceCollection AddCognitoAuthentication(
            this IServiceCollection services,
            ConfigurationManager configuration) 
-            => services.AddCognitoAuthentication(configuration, assemblyName => new SecureStorage(assemblyName));
+            => services.AddCognitoAuthentication(configuration, assemblyName => new LocalSecureStorage(assemblyName));
 
         public static IServiceCollection AddCognitoAuthentication(
            this IServiceCollection services,
